@@ -54,37 +54,8 @@ void postTransmission() {
   digitalWrite(MAX485_DE, 0);
 }
 
-// A list of the regisities to query in order
-typedef void (*RegistryList[])();
 
-RegistryList Registries = {
-  AddressRegistry_3100,
-  AddressRegistry_3106,
-  AddressRegistry_310D,
-  AddressRegistry_311A,
-  AddressRegistry_331B,
-};
 
-// keep log of where we are
-uint8_t currentRegistryNumber = 0;
-
-// function to switch to next registry
-void nextRegistryNumber() {
-  // better not use modulo, because after overlow it will start reading in incorrect order
-  currentRegistryNumber++;
-  if (currentRegistryNumber >= ARRAY_SIZE(Registries)) {
-    currentRegistryNumber = 0;
-  }
-}
-
-// ****************************************************************************
-
-// --------------------------------------------------------------------------------
-
-// exec a function of registry read (cycles between different addresses)
-void executeCurrentRegistryFunction() {
-  Registries[currentRegistryNumber]();
-}
 
 uint8_t setOutputLoadPower(uint8_t state) {
   Serial.print("Writing coil 0x0006 value to: ");
@@ -231,6 +202,39 @@ void AddressRegistry_331B() {
   }
 }
 
+// A list of the regisities to query in order
+typedef void (*RegistryList[])();
+
+RegistryList Registries = {
+  AddressRegistry_3100,
+  AddressRegistry_3106,
+  AddressRegistry_310D,
+  AddressRegistry_311A,
+  AddressRegistry_331B,
+};
+
+
+// keep log of where we are
+uint8_t currentRegistryNumber = 0;
+
+// function to switch to next registry
+void nextRegistryNumber() {
+  // better not use modulo, because after overlow it will start reading in incorrect order
+  currentRegistryNumber++;
+  if (currentRegistryNumber >= ARRAY_SIZE(Registries)) {
+    currentRegistryNumber = 0;
+  }
+}
+
+// ****************************************************************************
+
+// --------------------------------------------------------------------------------
+
+// exec a function of registry read (cycles between different addresses)
+void executeCurrentRegistryFunction() {
+  Registries[currentRegistryNumber]();
+}
+
 SoftwareSerial mySerial;
 void setup() {
   // put your setup code here, to run once:
@@ -274,7 +278,6 @@ void loop() {
     }
 
     digitalWrite(p_ledtick, ledState);
-    digitalWrite(redePin, LOW);
 
     executeCurrentRegistryFunction();
     nextRegistryNumber();
