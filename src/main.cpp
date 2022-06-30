@@ -35,7 +35,6 @@ int ledState = LOW;
 unsigned long previousMillis = 0;
 
 
-
 void setup() {
   // put your setup code here, to run once:
   pinMode(MAX485_RE_NEG, OUTPUT);
